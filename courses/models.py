@@ -10,10 +10,25 @@ class Categories(models.Model):
    def __str__(self):
        return self.name
 
-class Course(models.Model):
-    subject = models.CharField(null=False,  max_length=255)
-    description = models.TextField(null=True, blank=True)
+class ItemsBase(models.Model):
+    class Meta:
+        abstract = True
+    subject = models.CharField(null=False, max_length=255)
+    image = models.ImageField(upload_to='courses/%Y/%m',default=None)
     created_date = models.DateTimeField(auto_now_add=True)
     updated_date = models.DateTimeField(auto_now=True)
     active = models.BooleanField(default=True)
+
+class Course(ItemsBase):
+    class Meta:
+        unique_together = ('subject', 'category')
+        ordering = ["-id"]
+    description = models.TextField(null=True, blank=True)
     category = models.ForeignKey(Categories, on_delete=models.SET_NULL, null=True)
+
+class lesson(ItemsBase):
+    class Meta:
+        unique_together = ('subject', 'course')
+
+    content = models.TextField()
+    course = models.ForeignKey(Course, on_delete=models.CASCADE)
